@@ -1,0 +1,14 @@
+service: temp
+
+provider:
+  name: openwhisk
+  ignore_certs: true
+
+functions:
+  authorize-github:
+    handler: authorize.github
+    events:
+      - http: POST /authorize
+
+plugins:
+  - serverless-openwhisk
