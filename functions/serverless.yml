@@ -1,14 +1,17 @@
-service: temp
-
+service: authorize
 provider:
   name: openwhisk
   ignore_certs: true
 
 functions:
   authorize-github:
-    handler: authorize.github
+    handler: authorize.main
+    bind:
+      - service:
+          name: cloudantnosqldb
+          instance: Cloudant-vm
     events:
-      - http: POST /authorize
+      - http: GET /authorize
 
 plugins:
   - serverless-openwhisk
