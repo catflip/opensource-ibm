@@ -1,11 +1,15 @@
 service: authorize
+useDotenv: true
 provider:
   name: openwhisk
   ignore_certs: true
 
 functions:
   authorize-github:
-    handler: authorize.main
+    handler: authorize.github
+    parameters:
+      github_client_id: ${env:github_client_id}
+      github_client_secret: ${env:github_client_secret}
     bind:
       - service:
           name: cloudantnosqldb
@@ -15,3 +19,4 @@ functions:
 
 plugins:
   - serverless-openwhisk
+  - serverless-dotenv-plugin
