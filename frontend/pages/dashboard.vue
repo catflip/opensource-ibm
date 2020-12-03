@@ -1,13 +1,13 @@
 <template>
-  <Home :login="login" />
+  <Dashboard :login="login" />
 </template>
 <script lang="ts">
 import Cookies from 'js-cookie'
-import Home from '@/components/Home.vue'
+import Dashboard from '@/components/Dashboard.vue'
 import { Component, Vue } from 'nuxt-property-decorator'
 @Component({
   components: {
-    Home,
+    Dashboard,
   },
 })
 export default class MyStore extends Vue {

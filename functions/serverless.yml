@@ -7,15 +7,18 @@ provider:
 functions:
   authorize-github:
     handler: authorize.github
+    annotations:
+      web-export: true
     parameters:
       github_client_id: ${env:github_client_id}
       github_client_secret: ${env:github_client_secret}
+      token_pass: ${env:token_pass}
+      frontend_url: ${env:frontend_url}
     bind:
       - service:
           name: cloudantnosqldb
           instance: Cloudant-vm
-    events:
-      - http: GET /authorize
+ 
 
 plugins:
   - serverless-openwhisk

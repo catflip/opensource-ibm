@@ -13,8 +13,28 @@
       ></div>
     </v-row>
     <v-row justify="center" :class="['my-2']">
-      <v-btn :class="['my-2']" color="info" elevation="2">LOGIN</v-btn>
-      <v-btn :class="['my-2', 'mx-2']" color="error" elevation="2"
+      <v-btn
+        :class="['my-2']"
+        color="info"
+        elevation="2"
+        v-show="login"
+        href="/dashboard"
+        >DASHBOARD</v-btn
+      >
+      <v-btn
+        :class="['my-2']"
+        color="info"
+        elevation="2"
+        href="/login"
+        v-show="!login"
+        >LOGIN</v-btn
+      >
+      <v-btn
+        :class="['my-2', 'mx-2']"
+        color="error"
+        elevation="2"
+        v-show="login"
+        @click="logout"
         >LOGOUT</v-btn
       >
     </v-row>
@@ -55,7 +75,14 @@
   </div>
 </template>
 <script lang="ts">
-import { Component, Vue } from 'nuxt-property-decorator'
+import Cookies from 'js-cookie'
+import { Component, Vue, Prop } from 'nuxt-property-decorator'
 @Component
-export default class MyStore extends Vue {}
+export default class MyStore extends Vue {
+  @Prop({ required: true }) readonly login!: boolean
+  logout() {
+    Cookies.remove('token')
+    window.location.reload()
+  }
+}
 </script>
