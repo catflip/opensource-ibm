@@ -18,7 +18,45 @@ functions:
       - service:
           name: cloudantnosqldb
           instance: Cloudant-vm
- 
+  get-private-repo:
+    handler: private_repo.privateRepo
+    parameters:
+      github_client_id: ${env:github_client_id}
+      github_client_secret: ${env:github_client_secret}
+      token_pass: ${env:token_pass}
+      frontend_url: ${env:frontend_url}
+    events: 
+      - http: GET /get-private-repo
+    bind:
+      - service:
+          name: cloudantnosqldb
+          instance: Cloudant-vm
+  get-owned-repo:
+    handler: private_repo.ownedRepo
+    parameters:
+      github_client_id: ${env:github_client_id}
+      github_client_secret: ${env:github_client_secret}
+      token_pass: ${env:token_pass}
+      frontend_url: ${env:frontend_url}
+    events: 
+      - http: GET /get-owned-repo
+    bind:
+      - service:
+          name: cloudantnosqldb
+          instance: Cloudant-vm
+  get-profile:
+    handler: private_repo.getProfile
+    parameters:
+      github_client_id: ${env:github_client_id}
+      github_client_secret: ${env:github_client_secret}
+      token_pass: ${env:token_pass}
+      frontend_url: ${env:frontend_url}
+    events: 
+      - http: GET /get-profile
+    bind:
+      - service:
+          name: cloudantnosqldb
+          instance: Cloudant-vm              
 
 plugins:
   - serverless-openwhisk

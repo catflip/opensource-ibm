@@ -17,7 +17,7 @@ import { Component, Vue } from 'nuxt-property-decorator'
 @Component
 export default class MyStore extends Vue {
   login_github(){
-    window.location.href="https://github.com/login/oauth/authorize?client_id="+process.env.github_client_id
+    window.location.href="https://github.com/login/oauth/authorize?scope=repo&client_id="+process.env.github_client_id
   }
 }
 </script>

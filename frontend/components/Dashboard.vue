@@ -2,11 +2,15 @@
   <v-container>
     <v-row justify="space-between">
       <v-col cols="4" class="text-h4 font-weight-bold">Dashboard</v-col>
-      <v-col cols="4" class="d-flex justify-end"><v-btn>LOGOUT</v-btn></v-col>
+      <v-col cols="4" class="d-flex justify-end"><v-btn @click="logout">LOGOUT</v-btn></v-col>
     </v-row>
     <DashboardInfo />
     <v-row justify="space-between">
       <v-col cols="4" class="text-h4 font-weight-bold">Private Repo List</v-col>
+    </v-row>
+    <DashboardRepo />
+    <v-row justify="space-between">
+      <v-col cols="4" class="text-h4 font-weight-bold">Owned Repo</v-col>
     </v-row>
     <DashboardRepo />
   </v-container>
@@ -25,6 +29,10 @@ import { Component, Vue, Prop } from 'nuxt-property-decorator'
 })
 export default class MyStore extends Vue {
   @Prop({ required: true }) readonly login!: boolean
+  logout() {
+    Cookies.remove('token')
+    window.location.href="/"
+  }
   mounted() {
     // if (!this.login) window.location.href = '/'
   }

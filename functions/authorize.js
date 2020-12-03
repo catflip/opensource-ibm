@@ -19,6 +19,7 @@ const github = async function (params) {
       access_token,
       token_pass: params.token_pass,
     });
+    
     if(token){
       return  {
         headers: { location: `${params.frontend_url}/callback?token=${token}` },
@@ -38,6 +39,7 @@ const github = async function (params) {
       };
   }
 };
+module.exports.github = github;
 async function authenticate({ params }) {
   const { data } = await axios({
     url: "https://github.com/login/oauth/access_token",
@@ -68,15 +70,15 @@ async function getUsername({ access_token }) {
 async function checkUsername({ username, access_token, cloudant, token_pass }) {
   const token = jwt.sign({ access_token }, token_pass);
   const db = cloudant.db.use("ecommerce");
-  var query = {
+  const query = {
     selector: {
       $and: [{ username: { $eq: username } }, { collection: { $eq: "user" } }],
     },
   };
 
   const res = await db.find(query);
-  if (res.docs.length > 1) {
-    const { _id, _rev } = res.docs;
+  if (res.docs.length === 1) {
+    const { _id, _rev } = res.docs[0];
     const user = {
       _id,
       _rev,
@@ -85,6 +87,7 @@ async function checkUsername({ username, access_token, cloudant, token_pass }) {
       token,
       collection: "user",
     };
+    
     const {ok}= await db.insert(user);
      return ok && {token};
   } else {
@@ -94,4 +97,4 @@ async function checkUsername({ username, access_token, cloudant, token_pass }) {
     
   }
 }
-module.exports.github = github;
+

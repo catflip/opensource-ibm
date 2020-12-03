@@ -1,6 +1,8 @@
 <template>
-  <v-row>
-    <v-card max-width="400">
+  <div>
+    <v-row class="mb-2"><v-btn>Refresh Repo List</v-btn></v-row>
+<v-row>
+      <v-card max-width="400">
       <v-card-title>
         <v-list-item class="grow">
           <v-list-item-content>
@@ -34,5 +36,7 @@
         </v-row></v-card-action
       >
     </v-card>
-  </v-row>
+</v-row>
+
+  </div>
 </template>
