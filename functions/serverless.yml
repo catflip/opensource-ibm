@@ -45,7 +45,7 @@ functions:
           name: cloudantnosqldb
           instance: Cloudant-vm
   get-profile:
-    handler: private_repo.getProfile
+    handler: private_repo.profile
     parameters:
       github_client_id: ${env:github_client_id}
       github_client_secret: ${env:github_client_secret}

@@ -2,17 +2,19 @@
   <v-container>
     <v-row justify="space-between">
       <v-col cols="4" class="text-h4 font-weight-bold">Dashboard</v-col>
-      <v-col cols="4" class="d-flex justify-end"><v-btn @click="logout">LOGOUT</v-btn></v-col>
+      <v-col cols="4" class="d-flex justify-end"
+        ><v-btn @click="logout">LOGOUT</v-btn></v-col
+      >
     </v-row>
-    <DashboardInfo />
+    <DashboardInfo :username="username" :profilePhoto="profilePhoto" />
     <v-row justify="space-between">
       <v-col cols="4" class="text-h4 font-weight-bold">Private Repo List</v-col>
     </v-row>
-    <DashboardRepo />
+    <DashboardRepo :refreshRepo="getPrivateRepo" :listRepo="privateRepo" />
     <v-row justify="space-between">
       <v-col cols="4" class="text-h4 font-weight-bold">Owned Repo</v-col>
     </v-row>
-    <DashboardRepo />
+    <DashboardRepo :refreshRepo="getOwnedRepo" :listRepo="ownedRepo" />
   </v-container>
 </template>
 
@@ -29,12 +31,28 @@ import { Component, Vue, Prop } from 'nuxt-property-decorator'
 })
 export default class MyStore extends Vue {
   @Prop({ required: true }) readonly login!: boolean
+  public username: string = ''
+  public profilePhoto: string = ''
+  public privateRepo: Array<object> = []
+  public ownedRepo: Array<object> = []
   logout() {
     Cookies.remove('token')
-    window.location.href="/"
+    window.location.href = '/'
   }
-  mounted() {
+  async created() {
     // if (!this.login) window.location.href = '/'
+    const token = Cookies.get('token')
+    const url = process.env.get_profile_url
+    const {data} = await this.$axios.get(`${url}?token=${token}`)
+    this.username = data.data.login
+    this.profilePhoto = data.data.avatarUrl
   }
+  async getPrivateRepo() {
+    const token = Cookies.get('token')
+    const url = process.env.get_private_repo_url
+    const res = await this.$axios.get(`${url}?token=${token}`)
+    console.log(res.data.data)
+  }
+  async getOwnedRepo() {}
 }
 </script>

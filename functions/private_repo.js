@@ -10,60 +10,118 @@ const privateRepo = async function (params) {
       { iamauth: { iamApiKey: params.__bx_creds.cloudantnosqldb.apikey } },
     ],
   });
-  if (params.code) {
-    const { access_token } = await authenticate({ params });
-    const { login } = await getUsername({ access_token });
-    const { token } = await checkUsername({
-      username: login,
-      cloudant,
-      access_token,
-      token_pass: params.token_pass,
-    });
-    if (token) {
-      return {
-        headers: { location: `${params.frontend_url}/callback?token=${token}` },
-        statusCode: 302,
-      };
-    } else {
-      return {
-        headers: { location: params.frontend_url },
-        statusCode: 302,
-      };
-    }
+
+  const data = await getPrivateRepo({
+    cloudant,
+    token: params.token,
+    token_pass: params.token_pass,
+  });
+
+  if (data) {
+    return {
+      data:data.data.repositoryOwner.repositories.nodes,
+    };
   } else {
     return {
-      headers: { location: `${params.frontend_url}/login` },
-      statusCode: 302,
+      data: [],
     };
   }
 };
+const ownedRepo = async function (params) {
+  const cloudant = require("@cloudant/cloudant")({
+    url: params.__bx_creds.cloudantnosqldb.url,
+    plugins: [
+      { iamauth: { iamApiKey: params.__bx_creds.cloudantnosqldb.apikey } },
+    ],
+  });
+};
+
+const profile = async function (params) {
+  const cloudant = require("@cloudant/cloudant")({
+    url: params.__bx_creds.cloudantnosqldb.url,
+    plugins: [
+      { iamauth: { iamApiKey: params.__bx_creds.cloudantnosqldb.apikey } },
+    ],
+  });
+
+  const data = await getProfile({
+    cloudant,
+    token: params.token,
+    token_pass: params.token_pass,
+  });
+
+  if (data) {
+    return {
+      data:data.data.viewer,
+    };
+  } else {
+    return {
+      data: {},
+    };
+  }
+};
+module.exports.profile = profile;
 module.exports.privateRepo = privateRepo;
-async function getProfile({  cloudant, token_pass,token }) {
-    const {access_token} = jwt.verify( token , token_pass);
-    const db = cloudant.db.use("ecommerce");
+module.exports.ownedRepo = ownedRepo;
+async function getProfile({ cloudant, token_pass, token }) {
+  const { access_token } = jwt.verify(token, token_pass);
+  const db = cloudant.db.use("ecommerce");
   var query = {
-    selector: { access_token: { $eq: access_token }}   
+    selector: { access_token: { $eq: access_token } },
+    fields: ["access_token"],
   };
 
   const res = await db.find(query);
-  if (res.docs.length > 1) {
-    const { _id, _rev } = res.docs;
-    const user = {
-      _id,
-      _rev,
-      username,
-      access_token,
-      token,
-      collection: "user",
-    };
-    const {ok}= await db.insert(user);
-     return ok && {token};
+  if (res.docs.length === 1) {
+    const { data } = await axios({
+      url: "https://api.github.com/graphql",
+      headers: {
+        Authorization: `token ${res.docs[0].access_token}`,
+        Accept: "application/vnd.github.v3+json",
+      },
+      method: "POST",
+      data:{query:"query { viewer { login,avatarUrl }}"}
+    });
+    return data;
   } else {
-    const user = { username, access_token, token, collection: "user" };
-    const {ok}=await db.insert(user);
-    return ok && {token};
-    
+    return null;
   }
 }
-async function getPrivateRepo() {}
-async function getOwnedPrivateRepo() {}
+
+async function getPrivateRepo({ cloudant, token_pass, token }) {
+  const { access_token } = jwt.verify(token, token_pass);
+  const db = cloudant.db.use("ecommerce");
+  var query = {
+    selector: { access_token: { $eq: access_token } },
+    fields: ["access_token","username"],
+  };
+
+  const res = await db.find(query);
+  if (res.docs.length === 1) {
+    const { data } = await axios({
+      url: "https://api.github.com/graphql",
+      headers: {
+        Authorization: `token ${res.docs[0].access_token}`,
+        Accept: "application/vnd.github.v3+json",
+      },
+      method: "POST",
+      data:{query:`{
+        repositoryOwner(login: "spiritbro1") {
+          repositories(privacy: PRIVATE,first:5,orderBy:{field:CREATED_AT,direction:DESC}) {
+            nodes {
+              description
+              name
+              openGraphImageUrl
+              url
+            }
+          }
+        }
+      }
+      `}
+    });
+    return data;
+  } else {
+    return null;
+  }
+}
+async function getOwnedPrivateRepo({ cloudant, token_pass, token }) {}
