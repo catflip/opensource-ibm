@@ -1,4 +1,6 @@
-const profile = async function (params) {
+const axios = require("axios");
+const jwt = require("jsonwebtoken");
+const sell_repo = async function (params) {
     const cloudant = require("@cloudant/cloudant")({
       url: params.__bx_creds.cloudantnosqldb.url,
       plugins: [
@@ -6,24 +8,78 @@ const profile = async function (params) {
       ],
     });
   
-    const data = await getProfile({
+    const data = await sellRepo({
       cloudant,
       token: params.token,
       token_pass: params.token_pass,
+      _id:params._id,
+      amount:params.amount,
+      
     });
   
-    if (data) {
+    if (data && data.length>0) {
       return {
-        data: data.data.viewer,
+        data
       };
     } else {
       return {
-        data: {},
+        data,
       };
     }
   };
-  module.exports.profile = profile;
-  async function getPrivateRepo({ cloudant, token_pass, token }) {
+  const unlist_repo = async function (params) {
+    const cloudant = require("@cloudant/cloudant")({
+      url: params.__bx_creds.cloudantnosqldb.url,
+      plugins: [
+        { iamauth: { iamApiKey: params.__bx_creds.cloudantnosqldb.apikey } },
+      ],
+    });
+  
+    const data = await unlistRepo({
+      cloudant,
+      token: params.token,
+      token_pass: params.token_pass,
+      _id:params._id,
+      
+    });
+  
+    if (data && data.length>0) {
+      return {
+        data
+      };
+    } else {
+      return {
+        data,
+      };
+    }
+  };
+  const for_sale_repo = async function (params) {
+    const cloudant = require("@cloudant/cloudant")({
+      url: params.__bx_creds.cloudantnosqldb.url,
+      plugins: [
+        { iamauth: { iamApiKey: params.__bx_creds.cloudantnosqldb.apikey } },
+      ],
+    });
+  
+    const data = await forSaleRepo({
+      cloudant,
+      token: params.token,
+      token_pass: params.token_pass,
+      
+      
+    });
+  
+    if (data && data.length>0) {
+      return {
+        data
+      };
+    } else {
+      return {
+        data,
+      };
+    }
+  };
+  async function sellRepo({ cloudant, token_pass, token,_id,amount}) {
     const { access_token } = jwt.verify(token, token_pass);
     const db = cloudant.db.use("ecommerce");
     var query = {
@@ -33,17 +89,78 @@ const profile = async function (params) {
   
     const res = await db.find(query);
     if(res.docs.length===1){
-      const final = await db.find({
+      let repo = await db.find({
         selector: {
-          $and: [
-            { username: { $eq: res.docs[0].username } },
-            { collection: { $eq: "private-repo" } },
-          ],
+          _id:{$eq:_id}
         },
       });
-      return final.docs;
+      if(repo.docs.length===1){
+        repo.docs[0].amount=amount;
+        repo.docs[0].sell="SELL";
+        await db.insert(repo.docs[0])
+        const final=await db.find({selector:{username:res.docs[0].username,collection:"private-repo"}})
+        return final.docs
+      }else{
+        return {status:false,data:[],message:"error selling"}
+      }
+      
     }else{
-      return []
+      return {status:false,data:[],message:"error token"}
     }
     
   }
+  async function unlistRepo({ cloudant, token_pass, token,_id }) {
+    const { access_token } = jwt.verify(token, token_pass);
+    const db = cloudant.db.use("ecommerce");
+    var query = {
+      selector: { $and:[{access_token: { $eq: access_token } },{collection:{$eq:"user"}}]},
+      fields: ["access_token", "username"],
+    };
+  
+    const res = await db.find(query);
+    if(res.docs.length===1){
+      let repo = await db.find({
+        selector: {
+          _id:{$eq:_id}
+        },
+      });
+      if(repo.docs.length===1){
+        repo.docs[0].sell="UNLIST";
+        await db.insert(repo.docs[0])
+        const final=await db.find({selector:{username:res.docs[0].username,collection:"private-repo"}})
+        return final.docs
+      }else{
+        return {status:false,data:[],message:"error unlist"}
+      }
+      
+    }else{
+      return {status:false,data:[],message:"error token"}
+    }
+    
+  }
+  async function forSaleRepo({ cloudant, token_pass, token }) {
+    const { access_token } = jwt.verify(token, token_pass);
+    const db = cloudant.db.use("ecommerce");
+    var query = {
+      selector: { $and:[{access_token: { $eq: access_token } },{collection:{$eq:"user"}}]},
+      fields: ["access_token", "username"],
+    };
+  
+    const res = await db.find(query);
+    if(res.docs.length===1){
+      let repo = await db.find({
+        selector: {
+          collection:{$eq:"private-repo"},
+          sell:"SELL"
+        },
+      });
+      return repo.docs
+            
+    }else{
+      return {status:false,data:[],message:"error token"}
+    }
+    
+  }
+  module.exports.sell_repo = sell_repo;
+  module.exports.unlist_repo = unlist_repo;
+  module.exports.for_sale_repo = for_sale_repo;

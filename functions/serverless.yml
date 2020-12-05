@@ -70,7 +70,45 @@ functions:
       - service:
           name: cloudantnosqldb
           instance: Cloudant-vm              
-
+  sell-repo:
+    handler: sell_repo.sell_repo
+    parameters:
+      github_client_id: ${env:github_client_id}
+      github_client_secret: ${env:github_client_secret}
+      token_pass: ${env:token_pass}
+      frontend_url: ${env:frontend_url}
+    events: 
+      - http: POST /sell_repo
+    bind:
+      - service:
+          name: cloudantnosqldb
+          instance: Cloudant-vm
+  unlist-repo:
+    handler: sell_repo.unlist_repo
+    parameters:
+      github_client_id: ${env:github_client_id}
+      github_client_secret: ${env:github_client_secret}
+      token_pass: ${env:token_pass}
+      frontend_url: ${env:frontend_url}
+    events: 
+      - http: POST /unlist_repo
+    bind:
+      - service:
+          name: cloudantnosqldb
+          instance: Cloudant-vm
+  for-sale-repo:
+    handler: sell_repo.for_sale_repo
+    parameters:
+      github_client_id: ${env:github_client_id}
+      github_client_secret: ${env:github_client_secret}
+      token_pass: ${env:token_pass}
+      frontend_url: ${env:frontend_url}
+    events: 
+      - http: GET /for_sale_repo
+    bind:
+      - service:
+          name: cloudantnosqldb
+          instance: Cloudant-vm
 plugins:
   - serverless-openwhisk
   - serverless-dotenv-plugin

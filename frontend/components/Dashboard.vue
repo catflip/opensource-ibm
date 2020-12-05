@@ -10,11 +10,19 @@
     <v-row justify="space-between">
       <v-col cols="4" class="text-h4 font-weight-bold">Private Repo List</v-col>
     </v-row>
-    <DashboardRepo :refreshRepo="getPrivateRepo" :listRepo="privateRepo" />
+    <DashboardRepo
+      :refreshRepo="getPrivateRepo"
+      :listRepo="privateRepo"
+      @sell-repo="sellRepo($event._id, $event.amount)"
+      @unlist-repo="unlistRepo($event._id)"
+    />
     <v-row justify="space-between">
       <v-col cols="4" class="text-h4 font-weight-bold">Owned Repo</v-col>
     </v-row>
-    <DashboardRepo  :listRepo="ownedRepo" />
+    <DashboardRepo :listRepo="ownedRepo" />
+    <v-snackbar v-model="snackbarAmount">
+      the amount shouldn't be negative or zero
+    </v-snackbar>
   </v-container>
 </template>
 
@@ -33,6 +41,7 @@ export default class MyStore extends Vue {
   @Prop({ required: true }) readonly login!: boolean
   public username: string = ''
   public profilePhoto: string = ''
+  public snackbarAmount: boolean = false
   public privateRepo: Array<object> = []
   public ownedRepo: Array<object> = []
   logout() {
@@ -45,21 +54,44 @@ export default class MyStore extends Vue {
     const url = process.env.get_profile_url
     const privateRepoUrl = process.env.get_private_repo_url
     const ownedRepoUrl = process.env.get_owned_repo_url
-    const {data} = await this.$axios.get(`${url}?token=${token}`)
-    const privateRepo = await this.$axios.get(`${privateRepoUrl}?token=${token}`)
+    const { data } = await this.$axios.get(`${url}?token=${token}`)
+    const privateRepo = await this.$axios.get(
+      `${privateRepoUrl}?token=${token}`
+    )
     const ownedRepo = await this.$axios.get(`${ownedRepoUrl}?token=${token}`)
     this.username = data.data.login
     this.profilePhoto = data.data.avatarUrl
-    this.privateRepo=privateRepo.data.data
-    this.ownedRepo=ownedRepo.data.data
+    this.privateRepo = privateRepo.data.data
+    this.ownedRepo = ownedRepo.data.data
   }
   async getPrivateRepo() {
     const token = Cookies.get('token')
     const url = process.env.get_private_repo_refresh_url
-    const {data} = await this.$axios.get(`${url}?token=${token}`)
-    this.privateRepo=data.data
-
+    const { data } = await this.$axios.get(`${url}?token=${token}`)
+    this.privateRepo = data.data
   }
+  async sellRepo(_id: string, amount: number) {
+    // console.log(amount)
+    if (Number(amount) === 0 || Number(amount) < 0) {
+      console.log(amount)
+      this.snackbarAmount = true
+      return
+    } else {
+      const token = Cookies.get('token')
+      const url = process.env.sell_repo_url
 
+      const { data } = await this.$axios.post(`${url}?token=${token}`, {
+        _id,
+        amount,
+      })
+      this.privateRepo = data.data
+    }
+  }
+  async unlistRepo(_id: string) {
+    const token = Cookies.get('token')
+    const url = process.env.unlist_repo_url
+    const { data } = await this.$axios.post(`${url}?token=${token}`, { _id })
+    this.privateRepo = data.data
+  }
 }
 </script>

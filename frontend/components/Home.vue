@@ -39,36 +39,26 @@
       >
     </v-row>
     <v-row>
-      <v-card class="mx-auto my-12" max-width="374" :key="i" v-for="i in 6">
+      <v-card class="mx-auto my-12" max-width="374" :key="index" v-for="(item,index) in forSale">
         <v-img
           height="250"
-          src="https://cdn.vuetifyjs.com/images/cards/cooking.png"
+          :src="item.openGraphImageUrl"
         ></v-img>
 
-        <v-card-title>Fast Bitcoin Miner</v-card-title>
+        <v-card-title>{{item.name}}</v-card-title>
 
         <v-card-text>
-          <v-row align="center" class="mx-0">
-            <v-rating
-              :value="4.5"
-              color="amber"
-              dense
-              half-increments
-              readonly
-              size="14"
-            ></v-rating>
 
-            <div class="grey--text ml-4">4.5 (413)</div>
-          </v-row>
-
-          <div>This is a private repo that can mine bitcoin super fast</div>
+          <div>{{item.description}}</div>
         </v-card-text>
 
         <v-divider class="mx-4"></v-divider>
 
         <v-card-actions>
-          <v-btn color="deep-purple lighten-2" text> Detail </v-btn>
-          <v-btn color="deep-purple lighten-2" text> Buy Now </v-btn>
+          <v-flex>$ {{item.amount}}</v-flex>
+          <v-flex ><div class="d-flex justify-end"><v-btn class="d-flex justify-end" color="deep-purple lighten-2" @click="buyNow(item._id,item.amount)" text> Buy Now </v-btn>
+            </div></v-flex>
+
         </v-card-actions>
       </v-card>
     </v-row>
@@ -80,9 +70,19 @@ import { Component, Vue, Prop } from 'nuxt-property-decorator'
 @Component
 export default class MyStore extends Vue {
   @Prop({ required: true }) readonly login!: boolean
+  public forSale:Array<object>=[]
   logout() {
     Cookies.remove('token')
     window.location.reload()
+  }
+  async created(){
+  const token = Cookies.get('token')
+    const url = process.env.for_sale_repo_url
+    const { data } = await this.$axios.get(`${url}?token=${token}`)
+    this.forSale = data.data
+  }
+  async buyNow(_id,amount){
+
   }
 }
 </script>
