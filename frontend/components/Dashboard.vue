@@ -14,7 +14,7 @@
     <v-row justify="space-between">
       <v-col cols="4" class="text-h4 font-weight-bold">Owned Repo</v-col>
     </v-row>
-    <DashboardRepo :refreshRepo="getOwnedRepo" :listRepo="ownedRepo" />
+    <DashboardRepo  :listRepo="ownedRepo" />
   </v-container>
 </template>
 
@@ -43,16 +43,23 @@ export default class MyStore extends Vue {
     // if (!this.login) window.location.href = '/'
     const token = Cookies.get('token')
     const url = process.env.get_profile_url
+    const privateRepoUrl = process.env.get_private_repo_url
+    const ownedRepoUrl = process.env.get_owned_repo_url
     const {data} = await this.$axios.get(`${url}?token=${token}`)
+    const privateRepo = await this.$axios.get(`${privateRepoUrl}?token=${token}`)
+    const ownedRepo = await this.$axios.get(`${ownedRepoUrl}?token=${token}`)
     this.username = data.data.login
     this.profilePhoto = data.data.avatarUrl
+    this.privateRepo=privateRepo.data.data
+    this.ownedRepo=ownedRepo.data.data
   }
   async getPrivateRepo() {
     const token = Cookies.get('token')
-    const url = process.env.get_private_repo_url
-    const res = await this.$axios.get(`${url}?token=${token}`)
-    console.log(res.data.data)
+    const url = process.env.get_private_repo_refresh_url
+    const {data} = await this.$axios.get(`${url}?token=${token}`)
+    this.privateRepo=data.data
+
   }
-  async getOwnedRepo() {}
+
 }
 </script>
