@@ -12,10 +12,11 @@ const github = async function (params) {
   });
   if (params.code) {
     const { access_token } = await authenticate({ params });
-    const { login } = await getUsername({ access_token });
+    const { login,email } = await getUsername({ access_token });
     const {token} = await checkUsername({
       username: login,
       cloudant,
+      email,
       access_token,
       token_pass: params.token_pass,
     });
@@ -67,7 +68,7 @@ async function getUsername({ access_token }) {
   });
   return data;
 }
-async function checkUsername({ username, access_token, cloudant, token_pass }) {
+async function checkUsername({ username, access_token, cloudant, email,token_pass }) {
   const token = jwt.sign({ access_token }, token_pass);
   const db = cloudant.db.use("ecommerce");
   const query = {
@@ -85,13 +86,14 @@ async function checkUsername({ username, access_token, cloudant, token_pass }) {
       username,
       access_token,
       token,
+      email,
       collection: "user",
     };
     
     const {ok}= await db.insert(user);
      return ok && {token};
   } else {
-    const user = { username, access_token, token, collection: "user" };
+    const user = { username, access_token, token, email,collection: "user" };
     const {ok}=await db.insert(user);
     return ok && {token};
     

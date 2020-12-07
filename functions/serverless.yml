@@ -109,6 +109,37 @@ functions:
       - service:
           name: cloudantnosqldb
           instance: Cloudant-vm
+  paypal-auth:
+    handler: paypal.authorize_paypal
+    annotations:
+      web-export: true
+    parameters:
+      paypal_client_id: ${env:paypal_client_id}
+      paypal_client_secret: ${env:paypal_client_secret}
+      frontend_url: ${env:frontend_url}
+  save-paypal:
+    handler: paypal.save_paypal
+    parameters:
+      token_pass: ${env:token_pass}
+      frontend_url: ${env:frontend_url}
+    events: 
+      - http: POST /save_paypal
+    bind:
+      - service:
+          name: cloudantnosqldb
+          instance: Cloudant-vm
+  get-paypal:
+    handler: paypal.get_paypal
+    parameters:
+      token_pass: ${env:token_pass}
+      frontend_url: ${env:frontend_url}
+    events: 
+      - http: GET /get_paypal
+    bind:
+      - service:
+          name: cloudantnosqldb
+          instance: Cloudant-vm
+   
 plugins:
   - serverless-openwhisk
   - serverless-dotenv-plugin
