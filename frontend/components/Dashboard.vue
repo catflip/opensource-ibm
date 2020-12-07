@@ -55,11 +55,16 @@ export default class MyStore extends Vue {
     const url = process.env.get_profile_url
     const privateRepoUrl = process.env.get_private_repo_url
     const ownedRepoUrl = process.env.get_owned_repo_url
+    const getPaypalUrl = process.env.get_paypal_url
     const { data } = await this.$axios.get(`${url}?token=${token}`)
     const privateRepo = await this.$axios.get(
       `${privateRepoUrl}?token=${token}`
     )
     const ownedRepo = await this.$axios.get(`${ownedRepoUrl}?token=${token}`)
+    const paypalToken = await this.$axios.get(`${getPaypalUrl}?token=${token}`)
+    if(paypalToken.data.status){
+      this.paypalToken=true
+    }
     this.username = data.data.login
     this.profilePhoto = data.data.avatarUrl
     this.privateRepo = privateRepo.data.data
@@ -95,7 +100,10 @@ export default class MyStore extends Vue {
     this.privateRepo = data.data
   }
   async connectPaypal(){
-    window.location.href=`https://www.sandbox.paypal.com/connect/?flowEntry=static&client_id=${process.env.paypal_client_id}&response_type=code&scope=email&redirect_uri=${process.env.redirect_uri_paypal}`
+    if(this.username.trim()!==""){
+window.location.href=`https://www.sandbox.paypal.com/connect/?flowEntry=static&client_id=${process.env.paypal_client_id}&response_type=code&scope=email&redirect_uri=${process.env.redirect_uri_paypal}`
+    }else{alert("please wait until username shown")}
+
     // const formData=new FormData()
     // formData.append("grant_type","client_credentials")
     // const {data}=this.$axios({method:"POST",url:`https://api-m.sandbox.paypal.com/v1/oauth2/token`,headers:{"Authorization":"Basic "+window.btoa(`${process.env.paypal_client_id}:${process.env.paypal_client_secret}`)},data:formData})
