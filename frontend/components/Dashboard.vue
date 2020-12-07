@@ -6,7 +6,7 @@
         ><v-btn @click="logout">LOGOUT</v-btn></v-col
       >
     </v-row>
-    <DashboardInfo :username="username" :profilePhoto="profilePhoto" />
+    <DashboardInfo :username="username" :profilePhoto="profilePhoto" :paypalToken="paypalToken" @connect="connectPaypal"/>
     <v-row justify="space-between">
       <v-col cols="4" class="text-h4 font-weight-bold">Private Repo List</v-col>
     </v-row>
@@ -42,6 +42,7 @@ export default class MyStore extends Vue {
   public username: string = ''
   public profilePhoto: string = ''
   public snackbarAmount: boolean = false
+  public paypalToken: boolean = false
   public privateRepo: Array<object> = []
   public ownedRepo: Array<object> = []
   logout() {
@@ -92,6 +93,13 @@ export default class MyStore extends Vue {
     const url = process.env.unlist_repo_url
     const { data } = await this.$axios.post(`${url}?token=${token}`, { _id })
     this.privateRepo = data.data
+  }
+  async connectPaypal(){
+    window.location.href=`https://www.sandbox.paypal.com/connect/?flowEntry=static&client_id=${process.env.paypal_client_id}&response_type=code&scope=email&redirect_uri=${process.env.redirect_uri_paypal}`
+    // const formData=new FormData()
+    // formData.append("grant_type","client_credentials")
+    // const {data}=this.$axios({method:"POST",url:`https://api-m.sandbox.paypal.com/v1/oauth2/token`,headers:{"Authorization":"Basic "+window.btoa(`${process.env.paypal_client_id}:${process.env.paypal_client_secret}`)},data:formData})
+    // console.log(data)
   }
 }
 </script>
