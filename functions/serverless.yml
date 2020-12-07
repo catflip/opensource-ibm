@@ -139,7 +139,17 @@ functions:
       - service:
           name: cloudantnosqldb
           instance: Cloudant-vm
-   
+  delete-paypal:
+    handler: paypal.disconnect_paypal
+    parameters:
+      token_pass: ${env:token_pass}
+      frontend_url: ${env:frontend_url}
+    events: 
+      - http: POST /delete_paypal
+    bind:
+      - service:
+          name: cloudantnosqldb
+          instance: Cloudant-vm
 plugins:
   - serverless-openwhisk
   - serverless-dotenv-plugin

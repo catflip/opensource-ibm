@@ -12,6 +12,7 @@
     "serverless-openwhisk": ">=0.13.0"
   },
   "dependencies": {
+    "@paypal/checkout-server-sdk": "^1.0.2",
     "axios": "^0.21.0",
     "cloudant-quickstart": "^1.25.5",
     "jsonwebtoken": "^8.5.1"

@@ -147,6 +147,45 @@ async function getPaypal({ cloudant, token_pass, token }) {
   }
   
 }
+const disconnect_paypal=async function(params){
+  const cloudant = require("@cloudant/cloudant")({
+    url: params.__bx_creds.cloudantnosqldb.url,
+    plugins: [
+      { iamauth: { iamApiKey: params.__bx_creds.cloudantnosqldb.apikey } },
+    ],
+  });
+  const ok=await deletePaypal({cloudant,token_pass:params.token_pass,token:params.token})
+  if(ok){
+    return {status:true,data:ok}
+  }else{
+    return {status:false,message:"error"}
+  }
+}
+async function deletePaypal({ cloudant, token_pass, token }) {
+  const { access_token } = jwt.verify(token, token_pass);
+  const db = cloudant.db.use("ecommerce");
+  var query = {
+    selector: { $and:[{access_token: { $eq: access_token } },{collection:{$eq:"user"}}]},
+    fields: ["access_token", "username"],
+  };
+
+  const res = await db.find(query);
+  if(res.docs.length===1){
+    let paypal = await db.find({
+      selector: {
+        collection:{$eq:"paypal"},
+        github_username:res.docs[0].username
+      },
+    });
+    await db.destroy(paypal.docs[0]._id, paypal.docs[0]._rev)
+    return {status:true,message:"success"}
+          
+  }else{
+    return {status:false,data:[],message:"error token"}
+  }
+  
+}
 module.exports.authorize_paypal = authorize_paypal;
 module.exports.save_paypal = save_paypal;
 module.exports.get_paypal = get_paypal;
+module.exports.disconnect_paypal = disconnect_paypal;

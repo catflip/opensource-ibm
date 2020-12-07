@@ -6,20 +6,29 @@
         ><v-btn @click="logout">LOGOUT</v-btn></v-col
       >
     </v-row>
-    <DashboardInfo :username="username" :profilePhoto="profilePhoto" :paypalToken="paypalToken" :paypalBalance="paypalBalance" @connect="connectPaypal"/>
+    <DashboardInfo
+      :username="username"
+      :profilePhoto="profilePhoto"
+      :paypalToken="paypalToken"
+      :paypalBalance="paypalBalance"
+      @disconnect="disconnectPaypal"
+      @connect="connectPaypal"
+    />
     <v-row justify="space-between">
       <v-col cols="4" class="text-h4 font-weight-bold">Private Repo List</v-col>
     </v-row>
     <DashboardRepo
+    :amountRefresh="amountRefresh"
       :refreshRepo="getPrivateRepo"
       :listRepo="privateRepo"
+      :paypalToken="paypalToken"
       @sell-repo="sellRepo($event._id, $event.amount)"
       @unlist-repo="unlistRepo($event._id)"
     />
     <v-row justify="space-between">
       <v-col cols="4" class="text-h4 font-weight-bold">Owned Repo</v-col>
     </v-row>
-    <DashboardRepo :listRepo="ownedRepo" />
+    <DashboardRepo :paypalToken="paypalToken" :listRepo="ownedRepo" />
     <v-snackbar v-model="snackbarAmount">
       the amount shouldn't be negative or zero
     </v-snackbar>
@@ -45,7 +54,8 @@ export default class MyStore extends Vue {
   public paypalToken: boolean = false
   public privateRepo: Array<object> = []
   public ownedRepo: Array<object> = []
-  public paypalBalance:number=0;
+  public paypalBalance: number = 0
+  public amountRefresh:number=0
   logout() {
     Cookies.remove('token')
     window.location.href = '/'
@@ -57,21 +67,26 @@ export default class MyStore extends Vue {
     const privateRepoUrl = process.env.get_private_repo_url
     const ownedRepoUrl = process.env.get_owned_repo_url
     const getPaypalUrl = process.env.get_paypal_url
-    const { data } = await this.$axios.get(`${url}?token=${token}`)
+    const profile = await this.$axios.get(`${url}?token=${token}`)
+    this.username = profile.data.data.login
+    this.profilePhoto = profile.data.data.avatarUrl
     const privateRepo = await this.$axios.get(
       `${privateRepoUrl}?token=${token}`
     )
+    this.privateRepo = privateRepo.data.data
     const ownedRepo = await this.$axios.get(`${ownedRepoUrl}?token=${token}`)
+    this.ownedRepo = ownedRepo.data.data
     const paypalToken = await this.$axios.get(`${getPaypalUrl}?token=${token}`)
-    if(paypalToken.data.status){
-      this.paypalToken=true
-      this.paypalBalance=paypalToken.data.data.amount
+
+    if (paypalToken.data.status) {
+      this.paypalToken = true
+      this.paypalBalance = paypalToken.data.data.amount
     }
 
-    this.username = data.data.login
-    this.profilePhoto = data.data.avatarUrl
-    this.privateRepo = privateRepo.data.data
-    this.ownedRepo = ownedRepo.data.data
+
+
+
+
   }
   async getPrivateRepo() {
     const token = Cookies.get('token')
@@ -81,7 +96,7 @@ export default class MyStore extends Vue {
   }
   async sellRepo(_id: string, amount: number) {
     // console.log(amount)
-    if (Number(amount) === 0 || Number(amount) < 0) {
+    if (Number(amount) === 0 || Number(amount) < 0 || !amount) {
       console.log(amount)
       this.snackbarAmount = true
       return
@@ -93,6 +108,7 @@ export default class MyStore extends Vue {
         _id,
         amount,
       })
+      this.amountRefresh=0;
       this.privateRepo = data.data
     }
   }
@@ -102,15 +118,22 @@ export default class MyStore extends Vue {
     const { data } = await this.$axios.post(`${url}?token=${token}`, { _id })
     this.privateRepo = data.data
   }
-  async connectPaypal(){
-    if(this.username.trim()!==""){
-window.location.href=`https://www.sandbox.paypal.com/connect/?flowEntry=static&client_id=${process.env.paypal_client_id}&response_type=code&scope=email&redirect_uri=${process.env.redirect_uri_paypal}`
-    }else{alert("please wait until username shown")}
-
-    // const formData=new FormData()
-    // formData.append("grant_type","client_credentials")
-    // const {data}=this.$axios({method:"POST",url:`https://api-m.sandbox.paypal.com/v1/oauth2/token`,headers:{"Authorization":"Basic "+window.btoa(`${process.env.paypal_client_id}:${process.env.paypal_client_secret}`)},data:formData})
-    // console.log(data)
+  async connectPaypal() {
+    if (this.username.trim() !== '') {
+      window.location.href = `https://www.sandbox.paypal.com/connect/?flowEntry=static&client_id=${process.env.paypal_client_id}&response_type=code&scope=email&redirect_uri=${process.env.redirect_uri_paypal}`
+    } else {
+      alert('please wait until username shown')
+    }
+  }
+  async disconnectPaypal() {
+    if (this.username.trim() !== '') {
+      const url = process.env.disconnect_paypal_url
+      const token = Cookies.get('token')
+      this.$axios.post(`${url}?token=${token}`)
+      this.paypalToken = false
+    } else {
+      alert('please wait until username shown')
+    }
   }
 }
 </script>
