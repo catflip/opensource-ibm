@@ -50,6 +50,7 @@ import { Component, Vue, Prop,Emit } from 'nuxt-property-decorator'
 @Component
 export default class MyStore extends Vue {
   @Prop({ required: false }) readonly refreshRepo!: void
+  @Prop({ required: false }) readonly paypalToken!: boolean
   @Prop({ required: true }) readonly listRepo!: Array<object>
   public amount:number
   @Emit()

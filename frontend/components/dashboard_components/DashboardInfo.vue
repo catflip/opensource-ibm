@@ -20,9 +20,10 @@
           <v-list-item-title class="headline mb-1"> Balance </v-list-item-title>
           <v-list-item-title>
             <v-row justify="space-between">
-              <v-col><v-btn color="green" v-if="!paypalToken" @click="connect">CONNECT PAYPAL</v-btn></v-col>
-              <v-col class="font-weight-bold text-h5" v-if="paypalToken">{{paypalBalance}}</v-col>
+
+              <v-col class="font-weight-bold text-h5" v-if="paypalToken">$ {{paypalBalance}}</v-col>
               <v-col v-if="paypalToken"><v-btn color="green">withdraw</v-btn></v-col>
+              <v-col><v-btn color="green" v-if="!paypalToken" @click="connect">CONNECT PAYPAL</v-btn></v-col>
             </v-row>
           </v-list-item-title>
         </v-list-item-content>
@@ -36,8 +37,9 @@ import { Component, Vue, Prop,Emit } from 'nuxt-property-decorator'
 export default class MyStore extends Vue {
   @Prop({ required: true }) readonly username!: string
   @Prop({ required: true }) readonly profilePhoto!: string
-    @Prop({ required: false }) readonly paypalBalance!: string
+    @Prop({ required: false }) readonly paypalBalance!: number
     @Prop({ required: true }) readonly paypalToken!: boolean
+
 @Emit()
 connect(){}
 }

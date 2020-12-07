@@ -6,7 +6,7 @@
         ><v-btn @click="logout">LOGOUT</v-btn></v-col
       >
     </v-row>
-    <DashboardInfo :username="username" :profilePhoto="profilePhoto" :paypalToken="paypalToken" @connect="connectPaypal"/>
+    <DashboardInfo :username="username" :profilePhoto="profilePhoto" :paypalToken="paypalToken" :paypalBalance="paypalBalance" @connect="connectPaypal"/>
     <v-row justify="space-between">
       <v-col cols="4" class="text-h4 font-weight-bold">Private Repo List</v-col>
     </v-row>
@@ -45,6 +45,7 @@ export default class MyStore extends Vue {
   public paypalToken: boolean = false
   public privateRepo: Array<object> = []
   public ownedRepo: Array<object> = []
+  public paypalBalance:number=0;
   logout() {
     Cookies.remove('token')
     window.location.href = '/'
@@ -64,7 +65,9 @@ export default class MyStore extends Vue {
     const paypalToken = await this.$axios.get(`${getPaypalUrl}?token=${token}`)
     if(paypalToken.data.status){
       this.paypalToken=true
+      this.paypalBalance=paypalToken.data.data.amount
     }
+
     this.username = data.data.login
     this.profilePhoto = data.data.avatarUrl
     this.privateRepo = privateRepo.data.data
