@@ -156,6 +156,8 @@ functions:
       token_pass: ${env:token_pass}
       return_url: ${env:return_url}
       cancel_url: ${env:cancel_url}
+      paypal_client_id: ${env:paypal_client_id}
+      paypal_client_secret: ${env:paypal_client_secret}
       frontend_url: ${env:frontend_url}
     events: 
       - http: POST /buy_paypal

@@ -80,15 +80,20 @@ export default class MyStore extends Vue {
   async created(){
   const token = Cookies.get('token')
     const url = process.env.for_sale_repo_url
-    const { data } = await this.$axios.get(`${url}?token=${token}`)
+    try{
+const { data } = await this.$axios.get(`${url}?token=${token}`)
     this.forSale = data.data.data
     this.username=data.data.username
+    }catch(e){
+console.log(e.message)
+    }
+
   }
   async buyNow(_id){
     const url=process.env.buy_paypal_url
 const res=await this.$axios.post(url,{_id})
 if(!res.data.status){
-  alert(res.data.message)
+  console.log(res.data.message)
 }
   }
 }
