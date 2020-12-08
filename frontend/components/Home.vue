@@ -56,9 +56,10 @@
 
         <v-card-actions>
           <v-flex>$ {{item.amount}}</v-flex>
-          <v-flex ><div class="d-flex justify-end"><v-btn class="d-flex justify-end" color="deep-purple lighten-2" @click="buyNow(item._id,item.amount)" text> Buy Now </v-btn>
+          <v-flex v-if="item.username!==username" ><div class="d-flex justify-end"><v-btn class="d-flex justify-end" color="deep-purple lighten-2" @click="buyNow(item._id)" text> Buy Now </v-btn>
             </div></v-flex>
-
+<v-flex v-if="item.username===username" ><div class="d-flex justify-end"><v-btn class="d-flex justify-end" color="deep-purple lighten-2" @click="window.location.href=item.url" text> GO TO URL </v-btn>
+            </div></v-flex>
         </v-card-actions>
       </v-card>
     </v-row>
@@ -71,6 +72,7 @@ import { Component, Vue, Prop } from 'nuxt-property-decorator'
 export default class MyStore extends Vue {
   @Prop({ required: true }) readonly login!: boolean
   public forSale:Array<object>=[]
+  public username:string=""
   logout() {
     Cookies.remove('token')
     window.location.reload()
@@ -79,10 +81,15 @@ export default class MyStore extends Vue {
   const token = Cookies.get('token')
     const url = process.env.for_sale_repo_url
     const { data } = await this.$axios.get(`${url}?token=${token}`)
-    this.forSale = data.data
+    this.forSale = data.data.data
+    this.username=data.data.username
   }
-  async buyNow(_id,amount){
-
+  async buyNow(_id){
+    const url=process.env.buy_paypal_url
+const res=await this.$axios.post(url,{_id})
+if(!res.data.status){
+  alert(res.data.message)
+}
   }
 }
 </script>

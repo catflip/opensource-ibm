@@ -150,6 +150,19 @@ functions:
       - service:
           name: cloudantnosqldb
           instance: Cloudant-vm
+  buy-paypal:
+    handler: manage_access.buy_paypal
+    parameters:
+      token_pass: ${env:token_pass}
+      return_url: ${env:return_url}
+      cancel_url: ${env:cancel_url}
+      frontend_url: ${env:frontend_url}
+    events: 
+      - http: POST /buy_paypal
+    bind:
+      - service:
+          name: cloudantnosqldb
+          instance: Cloudant-vm
 plugins:
   - serverless-openwhisk
   - serverless-dotenv-plugin

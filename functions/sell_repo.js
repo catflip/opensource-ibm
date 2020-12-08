@@ -69,7 +69,7 @@ const sell_repo = async function (params) {
       
     });
   
-    if (data && data.length>0) {
+    if (data && data.data.length>0) {
       return {
         data
       };
@@ -154,7 +154,7 @@ const sell_repo = async function (params) {
           sell:"SELL"
         },
       });
-      return repo.docs
+      return {username:res.docs[0].username,data:repo.docs}
             
     }else{
       return {status:false,data:[],message:"error token"}
