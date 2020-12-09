@@ -57,6 +57,27 @@ const buy_paypal = async function (params) {
   return response
   
 };
+const manage_access = async function (params) {
+  const {access_token} = jwt.sign({ access_token:params.token }, params.token_pass);
+  const cloudant = require("@cloudant/cloudant")({
+    url: params.__bx_creds.cloudantnosqldb.url,
+    plugins: [
+      { iamauth: { iamApiKey: params.__bx_creds.cloudantnosqldb.apikey } },
+    ],
+  });
+  const db = cloudant.db.use("ecommerce");
+  const query = {
+    selector: {
+      $and: [{ access_token: { $eq: access_token } }, { collection: { $eq: "user" } }],
+    },
+  };
 
+  const res = await db.find(query);
+if(res.docs.length===1){
+  
+}
+  
+};
 module.exports.buy_paypal = buy_paypal;
+module.exports.manage_access = manage_access;
 
