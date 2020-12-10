@@ -167,6 +167,8 @@ functions:
           instance: Cloudant-vm
   manage-access:
     handler: manage_access.manage_access
+    annotations:
+      web-export: true
     parameters:
       token_pass: ${env:token_pass}
       return_url: ${env:return_url}
@@ -174,8 +176,6 @@ functions:
       paypal_client_id: ${env:paypal_client_id}
       paypal_client_secret: ${env:paypal_client_secret}
       frontend_url: ${env:frontend_url}
-    events: 
-      - http: GET /manage_access
     bind:
       - service:
           name: cloudantnosqldb

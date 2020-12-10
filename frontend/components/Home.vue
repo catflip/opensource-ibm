@@ -91,9 +91,10 @@ console.log(e.message)
   }
   async buyNow(_id){
     const url=process.env.buy_paypal_url
-const res=await this.$axios.post(url,{_id})
+    const token=Cookies.get("token")
+const res=await this.$axios.post(url,{_id,token})
 if(!res.data.status){
-  console.log(res.data.message)
+  console.log(res.data.data)
 }
   }
 }
