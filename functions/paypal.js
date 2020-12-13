@@ -11,7 +11,7 @@ const authorize_paypal = async function (params) {
 
     if (emails) {
       return {
-        headers: { location: `${params.frontend_url}/callback?state=paypal&email=${emails[0].value}` },
+        headers: { location: `${params.frontend_url}/callback/?email=${emails[0].value}` },
         statusCode: 302,
       };
     } else {
@@ -96,12 +96,13 @@ async function saveEmail({ token_pass,token, cloudant, email }) {
         email,
         amount,
         collection: "paypal",
+        disconnect:false
       };
   
       const { ok } = await db.insert(user);
       return ok ;
     }else{
-      const user = { github_username:res.docs[0].username, email,  collection: "paypal",amount:0 };
+      const user = { github_username:res.docs[0].username, email,  collection: "paypal",amount:0 ,disconnect:false};
       const { ok } = await db.insert(user);
       return ok ;
     }
@@ -170,6 +171,22 @@ async function deletePaypal({ cloudant, token_pass, token }) {
   };
 
   const res = await db.find(query);
+  const final = await db.find({
+    selector: {
+      $and: [
+        { username: { $eq: res.docs[0].username } },
+        { collection: { $eq: "private-repo" } },
+      ],
+    },
+  });
+  const privateRepo=final.docs.map(a=>{
+    a.sell="UNLIST"
+    return a;
+  })
+  if(privateRepo.length>0){
+    await db.insert(privateRepo)
+  }
+  
   if(res.docs.length===1){
     let paypal = await db.find({
       selector: {
@@ -177,7 +194,8 @@ async function deletePaypal({ cloudant, token_pass, token }) {
         github_username:res.docs[0].username
       },
     });
-    await db.destroy(paypal.docs[0]._id, paypal.docs[0]._rev)
+    paypal.docs[0].disconnect=true;
+    await db.insert(paypal.docs[0])
     return {status:true,message:"success"}
           
   }else{

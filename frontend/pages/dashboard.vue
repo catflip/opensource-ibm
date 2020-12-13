@@ -11,9 +11,12 @@ import { Component, Vue } from 'nuxt-property-decorator'
   },
 })
 export default class MyStore extends Vue {
-  public login: boolean =
-    Cookies.get('token') && Cookies?.get('token')?.trim() !== ''
+  public login: boolean =false;
+
+      mounted(){
+this.login=Cookies.get('token') && Cookies?.get('token')?.trim() !== ''
       ? true
       : false
+      }
 }
 </script>

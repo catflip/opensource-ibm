@@ -23,7 +23,7 @@ const github = async function (params) {
     
     if(token){
       return  {
-        headers: { location: `${params.frontend_url}/callback?token=${token}` },
+        headers: { location: `${params.frontend_url}/callback/?token=${token}` },
         statusCode: 302
         };
     }else{

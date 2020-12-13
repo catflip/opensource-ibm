@@ -1,7 +1,7 @@
 <template>
   <div>
     <v-row class="mb-2" v-if="refreshRepo"
-      ><v-btn @click="refreshRepo">Refresh Repo List</v-btn></v-row
+      ><v-btn @click="refreshRepo" :disabled="disabled">Refresh Repo List</v-btn></v-row
     >
     <v-row>
       <v-card
@@ -34,7 +34,7 @@
               <div
                 class="d-flex align-center text-h5"
                 :style="{ height: '100%' }"
-                v-if="item.sell === 'SELL'"
+                v-if="item.sell === 'SELL'&&!ownedRepo"
               >
                 $ {{ item.amount }}
               </div>
@@ -52,11 +52,14 @@
               <v-btn
                 @click="sellRepo(item._id, amount)"
                 color="red"
-                v-if="item.sell === 'UNLIST'"
-                :disabled="!paypalToken"
+                v-if="item.sell === 'UNLIST'&&!ownedRepo"
+                :disabled="!paypalToken||disabled"
                 >SELL</v-btn
-              ><v-btn :disabled="!paypalToken" v-if="item.sell === 'SELL'" @click="unlistRepo(item._id)"
+              ><v-btn :disabled="!paypalToken||disabled" v-if="item.sell === 'SELL'&&!ownedRepo" @click="unlistRepo(item._id)"
                 >UNLIST</v-btn
+              >
+              <v-btn v-if="ownedRepo" target="_blank" :href="item.url"
+                >GO TO URL</v-btn
               >
             </v-col>
           </v-row></v-card-action
@@ -73,6 +76,9 @@ export default class MyStore extends Vue {
   @Prop({ required: false }) readonly paypalToken!: boolean
   @Prop({ required: true }) readonly listRepo!: Array<object>
   @Prop({ required: true }) readonly amountRefresh!: number
+  @Prop({ required: true }) readonly ownedRepo!: boolean
+    @Prop({ required: true }) readonly disabled!: boolean
+
   public amount: number=this.amountRefresh
   @Emit()
   sellRepo(_id: string, amount: number) {

@@ -22,9 +22,9 @@
             <v-row justify="space-between">
 
               <v-col class="font-weight-bold text-h5" v-if="paypalToken">$ {{paypalBalance}}</v-col>
-             
-              <v-col v-if="paypalToken"><v-btn color="red"  @click="disconnect">DISCONNECT PAYPAL</v-btn></v-col>
-              <v-col v-if="!paypalToken"><v-btn color="blue"  @click="connect">CONNECT PAYPAL</v-btn></v-col>
+
+              <v-col v-if="paypalToken"><v-btn color="red" :disabled="disabled" @click="disconnect">DISCONNECT PAYPAL</v-btn></v-col>
+              <v-col v-if="!paypalToken"><v-btn color="blue" :disabled="disabled" @click="connect">CONNECT PAYPAL</v-btn></v-col>
             </v-row>
           </v-list-item-title>
         </v-list-item-content>
@@ -40,6 +40,7 @@ export default class MyStore extends Vue {
   @Prop({ required: true }) readonly profilePhoto!: string
     @Prop({ required: false }) readonly paypalBalance!: number
     @Prop({ required: true }) readonly paypalToken!: boolean
+    @Prop({ required: true }) readonly disabled!: boolean
 
 @Emit()
 connect(){}

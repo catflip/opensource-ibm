@@ -149,7 +149,7 @@ async function getPrivateRepoRefresh({ cloudant, token_pass, token }) {
       data: {
         query: `{
         repositoryOwner(login: "${res.docs[0].username}") {
-          repositories(privacy: PRIVATE,first:5,orderBy:{field:CREATED_AT,direction:DESC}) {
+          repositories(privacy: PRIVATE,first:2,orderBy:{field:CREATED_AT,direction:DESC}) {
             nodes {
               description
               name
