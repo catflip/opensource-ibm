@@ -72,6 +72,7 @@
           >
           <v-flex v-if="item.username === username || item.owned"
             ><div class="d-flex justify-end">
+
               <v-btn
               :disabled="disabled"
                 class="d-flex justify-end"
@@ -114,7 +115,7 @@ export default class MyStore extends Vue {
 
       this.forSale = data.data.data.map((a:any) => {
         if (
-          ownedRepo.data.data.filter((b:any) => b.owner_username === a.username)
+          ownedRepo.data.data.filter((b:any) => b.owner_username === a.username&&a.name===b.name)
             .length > 0
         ) {
           a.owned = true
