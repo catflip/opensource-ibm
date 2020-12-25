@@ -1,3 +1,3 @@
-# opensource-market
+# opensource private marketplace for ibm cloud
 
-dev.to article: https://dev.to/spiritbro1/create-an-open-source-private-marketplace-with-ibm-cloud-1d5g
+hashnode article: https://spiritbro1.hashnode.dev/create-an-open-source-private-marketplace-with-ibm-cloud
